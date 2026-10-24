@@ -15,8 +15,14 @@ type ChatMessage = {
   id: number;
   role: "user" | "assistant";
   content: string;
-  entry?: GlossaryEntry;
+  entry?: GlossaryEntry & { source?: string };
 };
+
+type ExplanationResponse = GlossaryEntry & {
+  source: string;
+};
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const stopWords = new Set([
   "a",
@@ -69,6 +75,26 @@ function findBestMatch(question: string) {
   return bestMatch;
 }
 
+function isExplanationResponse(value: unknown): value is ExplanationResponse {
+  if (!value || typeof value !== "object") return false;
+  const result = value as Record<string, unknown>;
+  const quiz = result.quiz;
+
+  return (
+    typeof result.id === "string" &&
+    typeof result.term === "string" &&
+    typeof result.simple === "string" &&
+    typeof result.mental_model === "string" &&
+    typeof result.real_world_example === "string" &&
+    typeof result.source === "string" &&
+    typeof quiz === "object" &&
+    quiz !== null &&
+    typeof (quiz as Record<string, unknown>).question === "string" &&
+    Array.isArray((quiz as Record<string, unknown>).options) &&
+    typeof (quiz as Record<string, unknown>).answer === "string"
+  );
+}
+
 export default function Home() {
   const [activeTerm, setActiveTerm] = useState<GlossaryEntry>(glossary[0]);
   const [input, setInput] = useState("What is RAG in simple words?");
@@ -82,33 +108,85 @@ export default function Home() {
   ]);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [approvalStatus, setApprovalStatus] = useState("Awaiting your review");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const question = input.trim();
-    if (!question) return;
+    if (!question || isLoading) return;
 
     const match = findBestMatch(question);
-    if (match) {
-      setActiveTerm(match);
-      setSelectedAnswer(null);
-      setApprovalStatus("Awaiting your review");
-    }
-
+    const userMessageId = Date.now();
     setMessages((previous) => [
       ...previous,
-      { id: Date.now(), role: "user", content: question },
-      {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: match
-          ? "Here’s the glossary-backed explanation."
-          : "I couldn’t match that question to a term in the AI Glossary. Try a glossary term, or ask about one of the suggested topics.",
-        entry: match,
-      },
+      { id: userMessageId, role: "user", content: question },
     ]);
-
     setInput("");
+    setSelectedAnswer(null);
+    setApprovalStatus("Awaiting your review");
+
+    if (match) {
+      setActiveTerm(match);
+      setMessages((previous) => [
+        ...previous,
+        { id: userMessageId + 1, role: "assistant", content: "Here’s the glossary-backed explanation.", entry: match },
+      ]);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/explain`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      const payload: unknown = await response.json();
+
+      if (!response.ok) {
+        const detail =
+          typeof payload === "object" &&
+          payload !== null &&
+          "detail" in payload &&
+          typeof payload.detail === "string"
+            ? payload.detail
+            : `The explanation service returned an error (${response.status}).`;
+        throw new Error(detail);
+      }
+      if (!isExplanationResponse(payload)) {
+        throw new Error("The explanation service returned an invalid response.");
+      }
+
+      setActiveTerm(payload);
+      setMessages((previous) => [
+        ...previous,
+        {
+          id: userMessageId + 1,
+          role: "assistant",
+          content:
+            payload.source === "AI Glossary"
+              ? "I found a matching definition in the glossary and asked the local model to explain it."
+              : "No glossary entry matched, so your local Ollama model answered from its knowledge.",
+          entry: payload,
+        },
+      ]);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "The explanation service failed for an unknown reason.";
+      setMessages((previous) => [
+        ...previous,
+        {
+          id: userMessageId + 1,
+          role: "assistant",
+          content: `Could not get an answer: ${message}`,
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -170,12 +248,10 @@ export default function Home() {
 
         <div className="source-banner">
           <div className="source-options" aria-label="Knowledge source availability">
-            <span className="source-choice active">AI Glossary · active</span>
-            <span className="source-choice unavailable" title="Connect an LLM provider to enable this source">
-              LLM knowledge · not connected
-            </span>
-            <span className="source-choice unavailable" title="Add a search provider and review flow to enable this source">
-              Web search + review · not connected
+            <span className="source-choice active">AI Glossary · first choice</span>
+            <span className="source-choice">Ollama · local fallback</span>
+            <span className="source-choice unavailable" title="Web search is not configured">
+              Web search · not connected
             </span>
           </div>
           <span className="source-badge">Data: AI Glossary · {glossaryData.source.name}</span>
@@ -191,6 +267,21 @@ export default function Home() {
                 <p className="message-copy">{message.content}</p>
                 {message.entry && (
                   <div className="answer-fields">
+                    <div className="answer-source">
+                      <span>Source:</span>
+                      {message.entry.source === "AI Glossary" ||
+                      message.entry.source === undefined ? (
+                        <a
+                          href={glossaryData.source.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          AI Glossary
+                        </a>
+                      ) : (
+                        <strong>{message.entry.source}</strong>
+                      )}
+                    </div>
                     <div className="answer-field">
                       <span>Term</span>
                       <strong>{message.entry.term}</strong>
@@ -239,8 +330,14 @@ export default function Home() {
             placeholder="Ask a question about AI, learning, or a glossary term..."
           />
           <div className="composer-actions">
-            <span className="micro-copy">Glossary-backed answers · check important facts</span>
-            <button type="submit" className="primary-button">Ask GlossAI</button>
+            <span className="micro-copy" role="status">
+              {isLoading
+                ? "Checking glossary, then asking local Ollama..."
+                : "Glossary first · local Ollama fallback"}
+            </span>
+            <button type="submit" className="primary-button" disabled={isLoading}>
+              {isLoading ? "Thinking..." : "Ask GlossAI"}
+            </button>
           </div>
         </form>
       </section>

@@ -55,11 +55,10 @@ Before running the app, make sure you have:
 ```bash
 cd api
 uv sync
-cp .env.example .env
-uv run python -m app.main
+uv run uvicorn app.main:app --reload
 ```
 
-If you are using the local model stack, make sure your environment variables and model configuration match your local setup.
+The API uses the local Ollama model `gemma4:e4b` by default. Ensure Ollama is running and that the model is installed (`ollama pull gemma4:e4b`). Set `OLLAMA_MODEL` to use a different installed model.
 
 ### 2) Frontend
 
@@ -73,7 +72,7 @@ Then open http://localhost:3000 in your browser.
 
 ## Environment variables
 
-The API includes an example environment file at `api/.env.example`. Copy it to `api/.env` and fill in any required secrets or model settings before running the application.
+The API defaults to Ollama at `http://localhost:11434` and model `gemma4:e4b`. To change the model, set `OLLAMA_MODEL` before starting the API.
 
 ## Notes
 
