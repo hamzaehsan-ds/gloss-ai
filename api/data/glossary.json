@@ -1,0 +1,132 @@
+{
+  "dataset_name": "AI Glossary",
+  "dataset_version": "1.0.0",
+  "description": "Starter glossary for an AI term explainer agent. Definitions are concise paraphrases; teaching examples and quiz questions are original.",
+  "source": {
+    "name": "Stanford HAI Artificial Intelligence Glossary",
+    "url": "https://hai.stanford.edu/ai-definitions",
+    "retrieved_date": "2026-10-24"
+  },
+  "entries": [
+    {
+      "id": "rag",
+      "term": "RAG (Retrieval-Augmented Generation)",
+      "simple": "RAG lets an AI look up relevant information before it answers.",
+      "mental_model": "It is like an open-book test: find useful pages first, then write the answer.",
+      "real_world_example": "A support assistant searches the latest troubleshooting guide before advising a technician about a live equipment fault.",
+      "quiz": {
+        "question": "What does retrieval add to a language model's answer process?",
+        "options": ["A lookup of relevant external information", "More training data during each answer", "A guarantee that every answer is correct"],
+        "answer": "A lookup of relevant external information"
+      }
+    },
+    {
+      "id": "large-language-model",
+      "term": "Large Language Model (LLM)",
+      "simple": "An LLM is an AI model trained on lots of text to work with language.",
+      "mental_model": "Think of a highly capable autocomplete system that learned patterns from many examples.",
+      "real_world_example": "A dispatcher asks an assistant to turn a customer's long service request into a concise job summary.",
+      "quiz": {
+        "question": "What kind of information is an LLM primarily trained to work with?",
+        "options": ["Language", "Electricity usage", "GPS coordinates only"],
+        "answer": "Language"
+      }
+    },
+    {
+      "id": "embeddings",
+      "term": "Embeddings",
+      "simple": "Embeddings represent data as numbers that capture useful similarities.",
+      "mental_model": "They place similar meanings near each other on a map of concepts.",
+      "real_world_example": "A help center finds an article about a 'boiler not firing' when a user searches 'heating won't start'.",
+      "quiz": {
+        "question": "In a semantic search system, what do embeddings help compare?",
+        "options": ["Meaning or characteristics", "File creation dates only", "Exact spelling only"],
+        "answer": "Meaning or characteristics"
+      }
+    },
+    {
+      "id": "vector-database",
+      "term": "Vector Database",
+      "simple": "A vector database stores and searches numerical representations of data.",
+      "mental_model": "It is a library index that finds items by closeness of meaning, not just matching words.",
+      "real_world_example": "A RAG assistant searches stored manuals for passages related to a technician's fault description.",
+      "quiz": {
+        "question": "What does a vector database commonly search through?",
+        "options": ["Numerical vectors", "Only spreadsheet formulas", "Only image filenames"],
+        "answer": "Numerical vectors"
+      }
+    },
+    {
+      "id": "agentic-ai",
+      "term": "Agentic AI",
+      "simple": "Agentic AI can plan steps and use tools to work toward a goal.",
+      "mental_model": "It behaves more like a delegated assistant that can take a sequence of actions.",
+      "real_world_example": "An operations agent checks a job record, looks up a part number, and drafts a purchase request for review.",
+      "quiz": {
+        "question": "Which capability is characteristic of agentic AI?",
+        "options": ["Planning and taking actions with tools", "Only repeating a fixed response", "Changing its own source code by default"],
+        "answer": "Planning and taking actions with tools"
+      }
+    },
+    {
+      "id": "human-in-the-loop",
+      "term": "Human-in-the-loop",
+      "simple": "Human-in-the-loop systems include people in feedback or decision steps.",
+      "mental_model": "The AI prepares or recommends; a person checks or guides important steps.",
+      "real_world_example": "A supervisor reviews an AI-drafted safety recommendation before it is sent to a field engineer.",
+      "quiz": {
+        "question": "What role does a person have in a human-in-the-loop system?",
+        "options": ["Providing feedback or intervention", "Being removed from every decision", "Replacing the system's data"],
+        "answer": "Providing feedback or intervention"
+      }
+    },
+    {
+      "id": "hallucination",
+      "term": "Hallucination (in AI)",
+      "simple": "An AI hallucination is a made-up or incorrect answer presented as if it were true.",
+      "mental_model": "The model fills a gap with a plausible-sounding guess instead of a verified fact.",
+      "real_world_example": "An assistant invents a part compatibility detail that is absent from the manufacturer's manual.",
+      "quiz": {
+        "question": "Why should an AI-generated factual claim be checked?",
+        "options": ["It may sound certain while being wrong", "It always comes from a live database", "It cannot contain invented details"],
+        "answer": "It may sound certain while being wrong"
+      }
+    },
+    {
+      "id": "prompt-injection",
+      "term": "Prompt Injection",
+      "simple": "Prompt injection is input designed to trick an AI into ignoring its intended instructions.",
+      "mental_model": "It is like a malicious note hidden in a document that tries to redirect the assistant.",
+      "real_world_example": "A retrieved web page tells an assistant to reveal private data instead of answering the user's question.",
+      "quiz": {
+        "question": "Where might a prompt injection attempt appear?",
+        "options": ["In user input or retrieved content", "Only in model training hardware", "Only in a vector's numeric format"],
+        "answer": "In user input or retrieved content"
+      }
+    },
+    {
+      "id": "context-window",
+      "term": "Context Window",
+      "simple": "A context window is the amount of input an AI can consider at one time.",
+      "mental_model": "It is the assistant's working desk: only so much material fits there at once.",
+      "real_world_example": "A long maintenance history is summarized so the assistant can focus on the latest fault and relevant past visits.",
+      "quiz": {
+        "question": "What happens when useful information exceeds the context window?",
+        "options": ["Some information may need to be shortened or left out", "The model automatically remembers it forever", "The model becomes a vector database"],
+        "answer": "Some information may need to be shortened or left out"
+      }
+    },
+    {
+      "id": "inference",
+      "term": "Inference",
+      "simple": "Inference is when a trained model uses new input to produce a prediction or response.",
+      "mental_model": "Training is practice; inference is using what was learned on a new case.",
+      "real_world_example": "A deployed model reads a new service description and classifies its likely equipment category.",
+      "quiz": {
+        "question": "When does inference happen?",
+        "options": ["When a trained model handles new input", "Only while collecting training labels", "Only when installing a database"],
+        "answer": "When a trained model handles new input"
+      }
+    }
+  ]
+}

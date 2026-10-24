@@ -1,0 +1,11 @@
+api/.venv
+web/.venv
+api/code
+
+Notebooks/
+
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
